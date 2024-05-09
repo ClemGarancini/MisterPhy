@@ -8,6 +8,7 @@ using Unity.VisualScripting;
 public class CharacterMovementManagment : MonoBehaviour
 {
 
+
     private FrameInput frameInput;
     private Gravity gravity;
 
