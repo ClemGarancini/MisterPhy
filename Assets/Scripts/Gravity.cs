@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
+
 using UnityEngine;
 
 public class Gravity : MonoBehaviour
 {
 
     private Vector3 gravity = new Vector3(0.0f, -9.8f, 0.0f); // m/s2
-    private Vector3 speed; // m/s
+    public Vector3 speed; // m/s
     private Vector3 acceleration;
     private bool isGrounded;
 
@@ -36,5 +34,10 @@ public class Gravity : MonoBehaviour
             isGrounded = true;
             speed.y = 0.0f;
         }
+    }
+
+    public Vector3 GetSpeed()
+    {
+        return speed;
     }
 }
