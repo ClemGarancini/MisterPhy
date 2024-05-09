@@ -24,6 +24,8 @@ public class Rebound : MonoBehaviour
     public GameObject arrow;
     private GameObject weightArrow;
     private GameObject normalReactionArrow;
+    private GameObject accelerationArrow;
+
 
 
     public float sprintMultiplier = 10.0f;
@@ -32,7 +34,11 @@ public class Rebound : MonoBehaviour
         transform.localScale = new Vector3(2 * radius, 2 * radius, 0.0f);
         weight = new Vector3(0.0f, -mass * gravity, 0.0f);
 
-        InstantiateArrow(weightArrow, Color.red);
+        InstantiateArrow(ref weightArrow, Color.red);
+        InstantiateArrow(ref normalReactionArrow, Color.blue);
+        InstantiateArrow(ref accelerationArrow, Color.green);
+
+
 
     }
 
@@ -42,7 +48,7 @@ public class Rebound : MonoBehaviour
         normalReaction = isGrounded ? -weight : Vector3.zero;
         if (transform.position.y - radius < 0)
         {
-            transform.position += new Vector3(0.0f, radius - transform.position.y, 0.0f);
+            transform.position += new Vector3(0.0f, radius - transform.position.y - 0.001f, 0.0f);
         }
 
         Vector3 F = weight + normalReaction;
@@ -72,18 +78,20 @@ public class Rebound : MonoBehaviour
 
         UpdateForceArrow(weightArrow, transform.position, weight);
         UpdateForceArrow(normalReactionArrow, transform.position, normalReaction); ;
+        UpdateForceArrow(accelerationArrow, transform.position, acceleration);
+
 
 
     }
 
-    void InstantiateArrow(GameObject forceArrow, Color color)
+    void InstantiateArrow(ref GameObject forceArrow, Color color)
     {
 
         forceArrow = Instantiate(arrow, transform.position, Quaternion.identity);
         GameObject square = forceArrow.transform.Find("Square").gameObject;
         GameObject triangle = forceArrow.transform.Find("Triangle").gameObject;
         SpriteRenderer squareRender = square.GetComponent<SpriteRenderer>();
-        squareRender.color = Color.red;
+        squareRender.color = color;
         SpriteRenderer triangleRender = triangle.GetComponent<SpriteRenderer>();
         triangleRender.color = color;
     }
