@@ -7,10 +7,12 @@ public class Rebound : MonoBehaviour
     public float mass = 0.1f;
 
     public float radius = 1.0f;
+    public float jumpForce = 5.0f;
 
+    public float moveSpeed = 5f;
     public float gravity = 9.8f;
 
-    public float stiffness = 0.8f;
+    public float stiffness = 0.2f;
 
     public Vector3 speed; // m/s
     public Vector3 acceleration;
@@ -25,6 +27,7 @@ public class Rebound : MonoBehaviour
     private Vector3 nominalForce = new Vector3(1.0f, 0.0f, 0.0f);
     private Vector3 inputForce;
 
+    public float maxSpeed = 20f;
     public float moveInput;
     // Start is called before the first frame update
 
@@ -62,7 +65,12 @@ public class Rebound : MonoBehaviour
 
         solidFriction = isGrounded ? -moveInput * nominalForce : Vector3.zero;
 
-        inputForce = moveInput * nominalForce;
+        inputForce = isGrounded ? moveInput * nominalForce : Vector3.zero;
+
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            inputForce = 2 * moveInput * nominalForce;
+        }
 
         if (transform.position.y - radius < 0)
         {
@@ -74,15 +82,19 @@ public class Rebound : MonoBehaviour
 
         acceleration = F / mass;
 
-
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (moveInput != 0)
         {
-            acceleration = new Vector3(sprintMultiplier, acceleration.y, 0.0f);
+            if (speed.x == 0) speed = new Vector3(moveInput * moveSpeed, speed.y, 0.0f);
         }
-
+        else
+        {
+            speed = new Vector3(0.0f, speed.y, 0.0f);
+        }
         //Debug.Log("Acceleration: " + acceleration);
         //Debug.Log("Speed: " + speed);
+
         speed += acceleration * Time.deltaTime;
+
         transform.position += speed * Time.deltaTime;
         if (transform.position.y <= radius)
         {
@@ -94,6 +106,16 @@ public class Rebound : MonoBehaviour
             isGrounded = false;
         }
 
+        if (Mathf.Abs(speed.x) > maxSpeed)
+        {
+            speed.x = maxSpeed * speed.x / (Mathf.Abs(speed.x));
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            speed = new Vector3(speed.x, jumpForce, 0.0f);
+        }
+        print(speed);
         UpdateForceArrow(weightArrow, transform.position, weight);
         UpdateForceArrow(normalReactionArrow, transform.position, normalReaction); ;
         UpdateForceArrow(solidFrictionArrow, transform.position, solidFriction); ;
