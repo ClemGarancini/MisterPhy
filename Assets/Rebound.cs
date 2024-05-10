@@ -1,5 +1,5 @@
 
-using System.Linq.Expressions;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Rebound : MonoBehaviour
@@ -19,6 +19,13 @@ public class Rebound : MonoBehaviour
 
     private Vector3 weight;
     private Vector3 normalReaction;
+
+    private Vector3 solidFriction;
+
+    private Vector3 nominalForce = new Vector3(1.0f, 0.0f, 0.0f);
+    private Vector3 inputForce;
+
+    public float moveInput;
     // Start is called before the first frame update
 
     public GameObject arrow;
@@ -26,7 +33,11 @@ public class Rebound : MonoBehaviour
     private GameObject normalReactionArrow;
     private GameObject accelerationArrow;
 
+    private GameObject solidFrictionArrow;
+    private GameObject inputForceArrow;
 
+
+    //private List<Vector3> forcesList = new List<Vector3>();
 
     public float sprintMultiplier = 10.0f;
     void Start()
@@ -36,7 +47,8 @@ public class Rebound : MonoBehaviour
 
         InstantiateArrow(ref weightArrow, Color.red);
         InstantiateArrow(ref normalReactionArrow, Color.blue);
-        InstantiateArrow(ref accelerationArrow, Color.green);
+        InstantiateArrow(ref solidFrictionArrow, Color.green);
+        InstantiateArrow(ref inputForceArrow, Color.yellow);
 
 
 
@@ -45,13 +57,19 @@ public class Rebound : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         normalReaction = isGrounded ? -weight : Vector3.zero;
+
+        solidFriction = isGrounded ? -moveInput * nominalForce : Vector3.zero;
+
+        inputForce = moveInput * nominalForce;
+
         if (transform.position.y - radius < 0)
         {
             transform.position += new Vector3(0.0f, radius - transform.position.y - 0.001f, 0.0f);
         }
 
-        Vector3 F = weight + normalReaction;
+        Vector3 F = weight + normalReaction + inputForce + solidFriction;
 
 
         acceleration = F / mass;
@@ -62,7 +80,7 @@ public class Rebound : MonoBehaviour
             acceleration = new Vector3(sprintMultiplier, acceleration.y, 0.0f);
         }
 
-        Debug.Log("Acceleration: " + acceleration);
+        //Debug.Log("Acceleration: " + acceleration);
         //Debug.Log("Speed: " + speed);
         speed += acceleration * Time.deltaTime;
         transform.position += speed * Time.deltaTime;
@@ -78,7 +96,8 @@ public class Rebound : MonoBehaviour
 
         UpdateForceArrow(weightArrow, transform.position, weight);
         UpdateForceArrow(normalReactionArrow, transform.position, normalReaction); ;
-        UpdateForceArrow(accelerationArrow, transform.position, acceleration);
+        UpdateForceArrow(solidFrictionArrow, transform.position, solidFriction); ;
+        UpdateForceArrow(inputForceArrow, transform.position, inputForce);
 
 
 
@@ -115,8 +134,6 @@ public class Rebound : MonoBehaviour
             {
                 angle = (force.y > 0) ? 90f : -90f;
             }
-
-            print(angle);
             forceArrow.transform.rotation = Quaternion.Euler(0.0f, 0.0f, angle);
         }
 
