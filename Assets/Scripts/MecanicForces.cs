@@ -16,7 +16,10 @@ public class GravityField : MonoBehaviour
     {
         return mass * gravity;
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> Charles
 }
 
 public class FluidFriction : MonoBehaviour
@@ -51,6 +54,7 @@ public class MecanicForces : MonoBehaviour
 
     // Start is called before the first frame update
 
+<<<<<<< HEAD
     public GameObject arrow;
     private GameObject weightArrow;
     private GameObject normalReactionArrow;
@@ -59,6 +63,8 @@ public class MecanicForces : MonoBehaviour
     private GameObject inputForceArrow;
     private GameObject fluidFrictionArrow;
 
+=======
+>>>>>>> Charles
 
     private double dynamicViscosity = 18.5 * 1e-6;
 
@@ -69,6 +75,7 @@ public class MecanicForces : MonoBehaviour
 
     void Start()
     {
+<<<<<<< HEAD
 
         InstantiateArrow(ref weightArrow, Color.red);
         InstantiateArrow(ref normalReactionArrow, Color.blue);
@@ -76,18 +83,28 @@ public class MecanicForces : MonoBehaviour
         InstantiateArrow(ref fluidFrictionArrow, Color.grey);
 
 
+=======
+>>>>>>> Charles
         gravityField = new(gravity);
         fluidFriction = new((float)dynamicViscosity);
 
     }
 
     // Update is called once per frame
+<<<<<<< HEAD
     public List<Vector3> ComputeForces(float mass, float radius, Vector3 speed, bool isGrounded, float moveInput)
+=======
+    public List<Vector3> ComputeForces(float mass, float radius, Vector3 velocity, bool isGrounded, float moveInput)
+>>>>>>> Charles
     {
         weight = gravityField.ComputeForce(mass);
         List<Vector3> forces = new() { weight };
 
+<<<<<<< HEAD
         fluidForce = fluidFriction.ComputeForce(2 * radius, speed);
+=======
+        fluidForce = fluidFriction.ComputeForce(2 * radius, velocity);
+>>>>>>> Charles
         forces.Add(fluidForce);
 
         normalReaction = isGrounded ? -weight : Vector3.zero;
@@ -97,6 +114,7 @@ public class MecanicForces : MonoBehaviour
         forces.Add(solidFriction);
 
 
+<<<<<<< HEAD
         UpdateForceArrow(weightArrow, transform.position, weight);
         UpdateForceArrow(normalReactionArrow, transform.position, normalReaction);
         UpdateForceArrow(solidFrictionArrow, transform.position, solidFriction);
@@ -144,4 +162,9 @@ public class MecanicForces : MonoBehaviour
 
 
     }
+=======
+        return forces;
+
+    }
+>>>>>>> Charles
 }
