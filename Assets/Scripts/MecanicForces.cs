@@ -16,10 +16,6 @@ public class GravityField : MonoBehaviour
     {
         return mass * gravity;
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> Charles
 }
 
 public class FluidFriction : MonoBehaviour
@@ -52,19 +48,7 @@ public class MecanicForces : MonoBehaviour
 
     private Vector3 fluidForce;
 
-    // Start is called before the first frame update
 
-<<<<<<< HEAD
-    public GameObject arrow;
-    private GameObject weightArrow;
-    private GameObject normalReactionArrow;
-
-    private GameObject solidFrictionArrow;
-    private GameObject inputForceArrow;
-    private GameObject fluidFrictionArrow;
-
-=======
->>>>>>> Charles
 
     private double dynamicViscosity = 18.5 * 1e-6;
 
@@ -75,36 +59,18 @@ public class MecanicForces : MonoBehaviour
 
     void Start()
     {
-<<<<<<< HEAD
-
-        InstantiateArrow(ref weightArrow, Color.red);
-        InstantiateArrow(ref normalReactionArrow, Color.blue);
-        InstantiateArrow(ref solidFrictionArrow, Color.green);
-        InstantiateArrow(ref fluidFrictionArrow, Color.grey);
-
-
-=======
->>>>>>> Charles
         gravityField = new(gravity);
         fluidFriction = new((float)dynamicViscosity);
 
     }
 
     // Update is called once per frame
-<<<<<<< HEAD
-    public List<Vector3> ComputeForces(float mass, float radius, Vector3 speed, bool isGrounded, float moveInput)
-=======
     public List<Vector3> ComputeForces(float mass, float radius, Vector3 velocity, bool isGrounded, float moveInput)
->>>>>>> Charles
     {
         weight = gravityField.ComputeForce(mass);
         List<Vector3> forces = new() { weight };
 
-<<<<<<< HEAD
-        fluidForce = fluidFriction.ComputeForce(2 * radius, speed);
-=======
         fluidForce = fluidFriction.ComputeForce(2 * radius, velocity);
->>>>>>> Charles
         forces.Add(fluidForce);
 
         normalReaction = isGrounded ? -weight : Vector3.zero;
@@ -114,57 +80,7 @@ public class MecanicForces : MonoBehaviour
         forces.Add(solidFriction);
 
 
-<<<<<<< HEAD
-        UpdateForceArrow(weightArrow, transform.position, weight);
-        UpdateForceArrow(normalReactionArrow, transform.position, normalReaction);
-        UpdateForceArrow(solidFrictionArrow, transform.position, solidFriction);
-        UpdateForceArrow(fluidFrictionArrow, transform.position, fluidForce);
-
         return forces;
 
     }
-
-    void InstantiateArrow(ref GameObject forceArrow, Color color)
-    {
-
-        forceArrow = Instantiate(arrow, transform.position, Quaternion.identity);
-        GameObject square = forceArrow.transform.Find("Square").gameObject;
-        GameObject triangle = forceArrow.transform.Find("Triangle").gameObject;
-        SpriteRenderer squareRender = square.GetComponent<SpriteRenderer>();
-        squareRender.color = color;
-        SpriteRenderer triangleRender = triangle.GetComponent<SpriteRenderer>();
-        triangleRender.color = color;
-    }
-
-    // Fonction pour dessiner les forces
-    void UpdateForceArrow(GameObject forceArrow, Vector3 position, Vector3 force)
-    {
-        forceArrow.transform.position = position;
-        float magnitude = Mathf.Sqrt(Mathf.Pow(force.x, 2) + Mathf.Pow(force.y, 2));
-        forceArrow.transform.localScale = new Vector3(magnitude, 1.0f, 1.0f);
-
-        float angle;
-
-        if (magnitude > 0)
-        {
-            if (force.x != 0)
-            {
-                angle = 180f * Mathf.Atan2(force.y, force.x) / Mathf.PI;
-            }
-            else
-            {
-                angle = (force.y > 0) ? 90f : -90f;
-            }
-            forceArrow.transform.rotation = Quaternion.Euler(0.0f, 0.0f, angle);
-        }
-
-
-
-
-    }
-=======
-        return forces;
-
-    }
->>>>>>> Charles
 }
