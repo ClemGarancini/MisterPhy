@@ -34,6 +34,8 @@ public class Energy : MonoBehaviour
     {
         return kineticEnergy.GetKineticEnergy(mass, velocity);
     }
+
+
     public float GetGravitationalPotentialEnergy(float mass, float gravity, float height)
     {
         return gravitationalPotentialEnergy.GetGravitationalPotentialEnergy(mass, gravity, height);

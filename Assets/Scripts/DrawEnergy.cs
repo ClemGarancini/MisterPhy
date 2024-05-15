@@ -10,12 +10,8 @@ public class DrawEnergy : MonoBehaviour
     private GameObject totalSquare;
     private GameObject totalText;
 
-
-
-    private Energy energy;
-    public void Initialize(Energy e, GameObject energySquare, GameObject text)
+    public void Initialize(GameObject energySquare, GameObject text)
     {
-        energy = e;
 
         kineticSquare = Instantiate(energySquare, new Vector3(5.0f, 5.0f, 0), Quaternion.identity);
         kineticSquare.transform.localScale = new Vector3(1.0f, 5.0f, 0.0f);
@@ -45,7 +41,6 @@ public class DrawEnergy : MonoBehaviour
 
         totalSquare.transform.localScale = new Vector3(1.0f, totalEnergy / 10.0f, 0.0f);
         totalSquare.transform.position = new Vector3(totalSquare.transform.position.x, 5.0f + totalSquare.transform.localScale.y / 2, 0.0f);
-
 
     }
 

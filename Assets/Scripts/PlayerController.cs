@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     public Vector3 velocity; // m/s
     public Vector3 acceleration;
 
+    public float timeMultiplier = 1.0f;
     // Forces
 
     private Vector3 inputForce;
@@ -25,10 +26,10 @@ public class PlayerController : MonoBehaviour
     Vector3 totalForce;
 
     // Input features
-    public float movevelocity = 5f;
-    public float jumpForce = 20f;
+    public float movevelocity = 10f;
+    public float jumpForce = 10f;
 
-    public float maxvelocity = 10.0f;
+    public float maxVelocity = 20.0f;
 
 
 
@@ -74,9 +75,9 @@ public class PlayerController : MonoBehaviour
         Jump();
         ComputeIntegration();
 
-        totalEnergy = energy.GetTotalEnergy(mass, -forcesComponent.gravity.y, transform.position.y, velocity);
         kineticEnergy = energy.GetKineticEnergy(mass, velocity);
-        gravitationalPotentialEnergy = energy.GetGravitationalPotentialEnergy(mass, -forcesComponent.gravity.y, transform.position.y);
+        gravitationalPotentialEnergy = energy.GetGravitationalPotentialEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius);
+        totalEnergy = energy.GetTotalEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius, velocity);
 
 
 
@@ -84,9 +85,10 @@ public class PlayerController : MonoBehaviour
 
     private void ComputeIntegration()
     {
+        float deltaTime = timeMultiplier * Time.deltaTime;
         acceleration = totalForce / mass;
-        velocity += acceleration * Time.deltaTime;
-        transform.position += velocity * Time.deltaTime;
+        velocity += acceleration * deltaTime;
+        transform.position += velocity * deltaTime;
     }
 
     private void AccelerationPressed()
@@ -126,9 +128,9 @@ public class PlayerController : MonoBehaviour
 
     private void velocityLimit()
     {
-        if (Mathf.Abs(velocity.x) > maxvelocity)
+        if (Mathf.Abs(velocity.x) > maxVelocity)
         {
-            velocity.x = maxvelocity * velocity.x / Mathf.Abs(velocity.x);
+            velocity.x = maxVelocity * velocity.x / Mathf.Abs(velocity.x);
         }
     }
 

@@ -6,7 +6,11 @@ public class DrawingManagement : MonoBehaviour
 {
     // Start is called before the first frame update
     private DrawEnergy drawEnergy;
+    private DrawKinematic drawKinematic;
+
     public GameObject energySquare;
+    public GameObject kinematicArrow;
+
     public GameObject text;
 
     private PlayerController playerController;
@@ -14,7 +18,10 @@ public class DrawingManagement : MonoBehaviour
     {
         playerController = GetComponent<PlayerController>();
         drawEnergy = new();
-        drawEnergy.Initialize(playerController.GetEnergy(), energySquare, text);
+        drawEnergy.Initialize(energySquare, text);
+
+        drawKinematic = new();
+        drawKinematic.Initialize(kinematicArrow, text);
 
     }
 
@@ -22,5 +29,7 @@ public class DrawingManagement : MonoBehaviour
     void Update()
     {
         drawEnergy.Draw(playerController.kineticEnergy, playerController.gravitationalPotentialEnergy, playerController.totalEnergy);
+        drawKinematic.Draw(playerController.velocity, playerController.acceleration);
+
     }
 }
