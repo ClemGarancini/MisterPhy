@@ -123,17 +123,19 @@ public class PlayerController : MonoBehaviour
 
     private void MoveInput()
     {
-        if (moveInput != 0)
+        if (isGrounded)
         {
-            inputForce = isGrounded ? moveInput * forcesComponent.nominalForce : Vector3.zero;
-            AccelerationPressed();
-            if (speed.x == 0) speed = new Vector3(moveInput * moveSpeed, speed.y, 0.0f);
-            totalForce += inputForce;
+            if (moveInput != 0)
+            {
+                inputForce = isGrounded ? moveInput * forcesComponent.nominalForce : Vector3.zero;
+                AccelerationPressed();
+                if (speed.x == 0) speed = new Vector3(moveInput * moveSpeed, speed.y, 0.0f);
+                totalForce += inputForce;
+            }
+            else
+            {
+                speed = new Vector3(0.0f, speed.y, 0.0f);
+            }
         }
-        else
-        {
-            speed = new Vector3(0.0f, speed.y, 0.0f);
-        }
-
     }
 }
