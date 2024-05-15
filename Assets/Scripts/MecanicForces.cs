@@ -48,7 +48,6 @@ public class MecanicForces : MonoBehaviour
 
     private Vector3 fluidForce;
 
-    // Start is called before the first frame update
 
 
     private double dynamicViscosity = 18.5 * 1e-6;

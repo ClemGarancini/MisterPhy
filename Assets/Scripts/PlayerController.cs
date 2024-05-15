@@ -156,5 +156,4 @@ public class PlayerController : MonoBehaviour
     {
         return energy;
     }
-
 }
