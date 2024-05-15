@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviour
 
 
     // Object kinematic features
-    public Vector3 speed; // m/s
+    public Vector3 velocity; // m/s
     public Vector3 acceleration;
 
     // Forces
@@ -21,20 +21,26 @@ public class PlayerController : MonoBehaviour
     private Vector3 inputForce;
 
     private MecanicForces forcesComponent;
-    private List<Vector3> externalForces;
+    public List<Vector3> externalForces { get; private set; }
     Vector3 totalForce;
 
     // Input features
-    public float moveSpeed = 5f;
+    public float movevelocity = 5f;
     public float jumpForce = 20f;
 
-    public float maxSpeed = 10.0f;
+    public float maxvelocity = 10.0f;
 
 
 
     private float moveInput;
 
     private bool isGrounded;
+
+    private Energy energy;
+    public float totalEnergy;
+    public float kineticEnergy;
+    public float gravitationalPotentialEnergy;
+
 
     private void Start()
     {
@@ -44,6 +50,8 @@ public class PlayerController : MonoBehaviour
 
         totalForce = Vector3.zero;
 
+        energy = new();
+        energy.Initialize();
     }
 
     private void Update()
@@ -54,7 +62,7 @@ public class PlayerController : MonoBehaviour
         moveInput = Input.GetAxisRaw("Horizontal");
         MoveInput();
 
-        externalForces = forcesComponent.ComputeForces(mass, radius, speed, isGrounded, moveInput);
+        externalForces = forcesComponent.ComputeForces(mass, radius, velocity, isGrounded, moveInput);
 
         foreach (Vector3 force in externalForces)
         {
@@ -62,11 +70,14 @@ public class PlayerController : MonoBehaviour
         }
 
 
-
         CheckGroundCollision();
-
         Jump();
         ComputeIntegration();
+
+        totalEnergy = energy.GetTotalEnergy(mass, -forcesComponent.gravity.y, transform.position.y, velocity);
+        kineticEnergy = energy.GetKineticEnergy(mass, velocity);
+        gravitationalPotentialEnergy = energy.GetGravitationalPotentialEnergy(mass, -forcesComponent.gravity.y, transform.position.y);
+
 
 
     }
@@ -74,8 +85,8 @@ public class PlayerController : MonoBehaviour
     private void ComputeIntegration()
     {
         acceleration = totalForce / mass;
-        speed += acceleration * Time.deltaTime;
-        transform.position += speed * Time.deltaTime;
+        velocity += acceleration * Time.deltaTime;
+        transform.position += velocity * Time.deltaTime;
     }
 
     private void AccelerationPressed()
@@ -84,7 +95,7 @@ public class PlayerController : MonoBehaviour
         {
             inputForce = 2 * moveInput * forcesComponent.nominalForce;
         }
-        SpeedLimit();
+        velocityLimit();
     }
 
     private void CheckGroundCollision()
@@ -96,7 +107,7 @@ public class PlayerController : MonoBehaviour
 
         if (!isGrounded && transform.position.y <= radius)
         {
-            speed.y = -stiffness * speed.y;
+            velocity.y = -stiffness * velocity.y;
             isGrounded = true;
         }
         else
@@ -109,15 +120,15 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            speed = new Vector3(speed.x, jumpForce, 0.0f);
+            velocity = new Vector3(velocity.x, jumpForce, 0.0f);
         }
     }
 
-    private void SpeedLimit()
+    private void velocityLimit()
     {
-        if (Mathf.Abs(speed.x) > maxSpeed)
+        if (Mathf.Abs(velocity.x) > maxvelocity)
         {
-            speed.x = maxSpeed * speed.x / Mathf.Abs(speed.x);
+            velocity.x = maxvelocity * velocity.x / Mathf.Abs(velocity.x);
         }
     }
 
@@ -129,13 +140,19 @@ public class PlayerController : MonoBehaviour
             {
                 inputForce = isGrounded ? moveInput * forcesComponent.nominalForce : Vector3.zero;
                 AccelerationPressed();
-                if (speed.x == 0) speed = new Vector3(moveInput * moveSpeed, speed.y, 0.0f);
+                if (velocity.x == 0) velocity = new Vector3(moveInput * movevelocity, velocity.y, 0.0f);
                 totalForce += inputForce;
             }
             else
             {
-                speed = new Vector3(0.0f, speed.y, 0.0f);
+                velocity = new Vector3(0.0f, velocity.y, 0.0f);
             }
         }
     }
+
+    public Energy GetEnergy()
+    {
+        return energy;
+    }
+
 }
