@@ -3,45 +3,64 @@ using UnityEngine;
 
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using Unity.Properties;
+using System;
 public class PlayerController : MonoBehaviour
 {
 
-    // Object characteristic
+    #region Shape characteristic
     public float radius = 1.0f;
     public float mass = 1f;
     public float stiffness = 0.2f;
+    #endregion
 
-
-    // Object kinematic features
+    #region Kinematic features
     public Vector3 velocity; // m/s
     public Vector3 acceleration;
-
     public float timeMultiplier = 1.0f;
-    // Forces
+    #endregion
 
+    #region Forces
     private Vector3 inputForce;
-
     private MecanicForces forcesComponent;
     public List<Vector3> externalForces { get; private set; }
     Vector3 totalForce;
+    #endregion
 
-    // Input features
-    public float movevelocity = 10f;
-    public float jumpForce = 10f;
-
-    public float maxVelocity = 20.0f;
-
-
-
-    private float moveInput;
-
-    private bool isGrounded;
-
+    #region Energy
     private Energy energy;
     public float totalEnergy;
     public float kineticEnergy;
     public float gravitationalPotentialEnergy;
+    #endregion
 
+    #region Input features
+    public float moveVelocity = 10f;
+    public float jumpForce = 10f;
+    public float maxVelocity = 20.0f;
+    #endregion
+
+    #region Input
+    public struct FrameInput
+    {
+        public float horizontal;
+        public bool jump;
+        public bool accelerate;
+    }
+    public FrameInput frameInput { get; private set; }
+    #endregion
+
+    #region State
+    public struct CollisionInformation
+    {
+        public bool isGroundedTemporary;
+        public bool isGroundedPermanent;
+        public HashSet<GameObject> collisionGameObjects;
+
+    }
+
+    public CollisionInformation collisionInformation;
+    #endregion
 
     private void Start()
     {
@@ -60,10 +79,10 @@ public class PlayerController : MonoBehaviour
 
         totalForce = Vector3.zero;
 
-        moveInput = Input.GetAxisRaw("Horizontal");
+        GetFrameInput();
         MoveInput();
 
-        externalForces = forcesComponent.ComputeForces(mass, radius, velocity, isGrounded, moveInput);
+        externalForces = forcesComponent.ComputeForces(this);
 
         foreach (Vector3 force in externalForces)
         {
@@ -71,16 +90,13 @@ public class PlayerController : MonoBehaviour
         }
 
 
-        CheckGroundCollision();
+        // CheckGroundCollision();
         Jump();
         ComputeIntegration();
 
         kineticEnergy = energy.GetKineticEnergy(mass, velocity);
         gravitationalPotentialEnergy = energy.GetGravitationalPotentialEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius);
         totalEnergy = energy.GetTotalEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius, velocity);
-
-
-
     }
 
     private void ComputeIntegration()
@@ -93,34 +109,44 @@ public class PlayerController : MonoBehaviour
 
     private void AccelerationPressed()
     {
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (frameInput.accelerate)
         {
-            inputForce = 2 * moveInput * forcesComponent.nominalForce;
+            inputForce = 2 * frameInput.horizontal * forcesComponent.nominalForce;
         }
         velocityLimit();
     }
 
-    private void CheckGroundCollision()
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        if (transform.position.y - radius < 0)
-        {
-            transform.position += new Vector3(0.0f, radius - transform.position.y - 0.001f, 0.0f);
-        }
+        // print(velocity.y);
 
-        if (!isGrounded && transform.position.y <= radius)
+        Vector3 contactNormal = collision.GetContact(0).normal;
+        float dotProd = Vector3.Dot(velocity, contactNormal);
+        // print($"Vel: {velocity}, Norm: {contactNormal}, Dot:{dotProd}");
+        if (!collisionInformation.isGroundedPermanent)
         {
-            velocity.y = -stiffness * velocity.y;
-            isGrounded = true;
+            // print((1.0f + stiffness) * Math.Abs(dotProd) * contactNormal);
+            velocity += (1.0f + stiffness) * Math.Abs(dotProd) * contactNormal;
+            // velocity.y = -stiffness * velocity.y;
         }
-        else
-        {
-            isGrounded = false;
-        }
+        collisionInformation.isGroundedTemporary = true;
     }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        collisionInformation.isGroundedPermanent = true;
+        velocity.y = 0.0f;
+    }
+
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        collisionInformation.isGroundedTemporary = false;
+    }
+
 
     private void Jump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (frameInput.jump && collisionInformation.isGroundedPermanent)
         {
             velocity = new Vector3(velocity.x, jumpForce, 0.0f);
         }
@@ -136,13 +162,13 @@ public class PlayerController : MonoBehaviour
 
     private void MoveInput()
     {
-        if (isGrounded)
+        if (collisionInformation.isGroundedPermanent)
         {
-            if (moveInput != 0)
+            if (frameInput.horizontal != 0)
             {
-                inputForce = isGrounded ? moveInput * forcesComponent.nominalForce : Vector3.zero;
+                inputForce = frameInput.horizontal * forcesComponent.nominalForce;
                 AccelerationPressed();
-                if (velocity.x == 0) velocity = new Vector3(moveInput * movevelocity, velocity.y, 0.0f);
+                if (velocity.x == 0) velocity = new Vector3(frameInput.horizontal * moveVelocity, velocity.y, 0.0f);
                 totalForce += inputForce;
             }
             else
@@ -156,4 +182,15 @@ public class PlayerController : MonoBehaviour
     {
         return energy;
     }
+
+    void GetFrameInput()
+    {
+        frameInput = new FrameInput
+        {
+            horizontal = Input.GetAxisRaw("Horizontal"),
+            jump = Input.GetKeyDown(KeyCode.Space),
+            accelerate = Input.GetKey(KeyCode.LeftShift)
+        };
+    }
+
 }

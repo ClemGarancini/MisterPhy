@@ -33,6 +33,18 @@ public class FluidFriction : MonoBehaviour
     }
 }
 
+public class SolidFriction : MonoBehaviour
+{
+    private float dynamicFrictionCoef;
+
+    public SolidFriction(float dynamicFrictionCoef)
+    {
+        this.dynamicFrictionCoef = dynamicFrictionCoef;
+    }
+
+    // public Vector3 ComputeForce()
+}
+
 public class MecanicForces : MonoBehaviour
 {
 
@@ -65,18 +77,24 @@ public class MecanicForces : MonoBehaviour
     }
 
     // Update is called once per frame
-    public List<Vector3> ComputeForces(float mass, float radius, Vector3 velocity, bool isGrounded, float moveInput)
+    public List<Vector3> ComputeForces(PlayerController playerController)
     {
+        float mass = playerController.mass;
+        float radius = playerController.radius;
+        Vector3 velocity = playerController.velocity;
+        PlayerController.CollisionInformation collisionInformation = playerController.collisionInformation;
+        float moveInput = playerController.frameInput.horizontal;
+
         weight = gravityField.ComputeForce(mass);
         List<Vector3> forces = new() { weight };
 
         fluidForce = fluidFriction.ComputeForce(2 * radius, velocity);
         forces.Add(fluidForce);
 
-        normalReaction = isGrounded ? -weight : Vector3.zero;
+        normalReaction = collisionInformation.isGroundedTemporary ? -weight : Vector3.zero;
         forces.Add(normalReaction);
 
-        solidFriction = isGrounded ? -moveInput * nominalForce : Vector3.zero;
+        solidFriction = collisionInformation.isGroundedPermanent ? -moveInput * nominalForce : Vector3.zero;
         forces.Add(solidFriction);
 
 
