@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class GravityField : MonoBehaviour
 {
+    // The weight is a conservative force which means it derivates from a potential energy (the gravitational potential energy)
     private Vector3 gravity;
 
     public GravityField(Vector3 gravity)
@@ -16,6 +17,7 @@ public class GravityField : MonoBehaviour
     {
         return mass * gravity;
     }
+
 }
 
 public class FluidFriction : MonoBehaviour

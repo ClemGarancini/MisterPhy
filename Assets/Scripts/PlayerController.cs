@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     public Vector3 velocity; // m/s
     public Vector3 acceleration;
     public float timeMultiplier = 1.0f;
+
+    public Vector3 initialPosition;
     #endregion
 
     #region Forces
@@ -32,12 +34,20 @@ public class PlayerController : MonoBehaviour
     public float totalEnergy;
     public float kineticEnergy;
     public float gravitationalPotentialEnergy;
+
     #endregion
 
     #region Input features
     public float moveVelocity = 10f;
     public float jumpForce = 10f;
     public float maxVelocity = 20.0f;
+    #endregion
+
+    #region Work
+
+    private Work work;
+    public float gravityWork;
+
     #endregion
 
     #region Input
@@ -64,6 +74,8 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        initialPosition = transform.position;
+
         forcesComponent = GetComponent<MecanicForces>();
 
         transform.localScale = new Vector3(2 * radius, 2 * radius, 0.0f);
@@ -72,6 +84,8 @@ public class PlayerController : MonoBehaviour
 
         energy = new();
         energy.Initialize();
+
+        work = new();
     }
 
     private void Update()
@@ -83,6 +97,7 @@ public class PlayerController : MonoBehaviour
         MoveInput();
 
         externalForces = forcesComponent.ComputeForces(this);
+        gravityWork = work.GetWork(externalForces[0], transform.position - initialPosition);
 
         foreach (Vector3 force in externalForces)
         {
@@ -113,7 +128,7 @@ public class PlayerController : MonoBehaviour
         {
             inputForce = 2 * frameInput.horizontal * forcesComponent.nominalForce;
         }
-        velocityLimit();
+        VelocityLimit();
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -149,10 +164,11 @@ public class PlayerController : MonoBehaviour
         if (frameInput.jump && collisionInformation.isGroundedPermanent)
         {
             velocity = new Vector3(velocity.x, jumpForce, 0.0f);
+            collisionInformation.isGroundedPermanent = false;
         }
     }
 
-    private void velocityLimit()
+    private void VelocityLimit()
     {
         if (Mathf.Abs(velocity.x) > maxVelocity)
         {

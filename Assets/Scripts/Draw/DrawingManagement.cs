@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DrawingManagement : MonoBehaviour
@@ -7,6 +5,7 @@ public class DrawingManagement : MonoBehaviour
     // Start is called before the first frame update
     private DrawEnergy drawEnergy;
     private DrawKinematic drawKinematic;
+    private DrawWork drawWork;
 
     public GameObject energySquare;
     public GameObject kinematicArrow;
@@ -23,6 +22,9 @@ public class DrawingManagement : MonoBehaviour
         drawKinematic = new();
         drawKinematic.Initialize(kinematicArrow, text);
 
+        drawWork = new();
+        drawWork.Initialize(energySquare, text);
+
     }
 
     // Update is called once per frame
@@ -30,6 +32,8 @@ public class DrawingManagement : MonoBehaviour
     {
         drawEnergy.Draw(playerController.kineticEnergy, playerController.gravitationalPotentialEnergy, playerController.totalEnergy);
         drawKinematic.Draw(playerController.velocity, playerController.acceleration);
+        drawWork.Draw(playerController.gravityWork);
+
 
     }
 }
