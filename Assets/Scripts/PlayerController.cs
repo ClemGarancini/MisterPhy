@@ -108,6 +108,10 @@ public class PlayerController : MonoBehaviour
         // CheckGroundCollision();
         Jump();
         ComputeIntegration();
+        if (transform.position.y < -25.0f)
+        {
+            transform.position = new Vector3(-20.0f, 60.0f, 0.0f);
+        }
 
         kineticEnergy = energy.GetKineticEnergy(mass, velocity);
         gravitationalPotentialEnergy = energy.GetGravitationalPotentialEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius);
