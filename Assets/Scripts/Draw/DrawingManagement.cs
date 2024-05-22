@@ -7,12 +7,17 @@ public class DrawingManagement : MonoBehaviour
     private DrawKinematic drawKinematic;
     private DrawWork drawWork;
 
+    private DrawForce drawForce;
     public GameObject energySquare;
     public GameObject kinematicArrow;
 
+    public Transform obj;
     public GameObject text;
 
     private PlayerController playerController;
+    public GameObject pendule;
+
+    private PendulumMovement pd;
     void Start()
     {
         playerController = GetComponent<PlayerController>();
@@ -25,6 +30,11 @@ public class DrawingManagement : MonoBehaviour
         drawWork = new();
         drawWork.Initialize(energySquare, text);
 
+        drawForce = new();
+        drawForce.Initialize(kinematicArrow, obj);
+
+        pd = pendule.GetComponent<PendulumMovement>();
+
     }
 
     // Update is called once per frame
@@ -33,6 +43,9 @@ public class DrawingManagement : MonoBehaviour
         drawEnergy.Draw(playerController.kineticEnergy, playerController.gravitationalPotentialEnergy, playerController.totalEnergy);
         drawKinematic.Draw(playerController.velocity, playerController.acceleration);
         drawWork.Draw(playerController.gravityWork);
+        print(pd.tensionForce);
+        drawForce.Draw(pd.tensionForce, obj);
+
 
 
     }

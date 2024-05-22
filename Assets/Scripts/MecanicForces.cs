@@ -55,12 +55,39 @@ public class NormalReaction : MonoBehaviour
     public Vector3 ComputeForce(PlayerController.CollisionInformation collisionInformation, Vector3 weight)
     {
         Vector3 force = Vector3.zero;
-        Vector3 contactNormal = collisionInformation.collision.GetContact(0).normal;
+
         if (collisionInformation.isGroundedTemporary)
         {
+            Vector3 contactNormal = collisionInformation.collision.GetContact(0).normal;
             force = Math.Abs(Vector3.Dot(contactNormal, weight)) * contactNormal;
         }
         return force;
+    }
+}
+
+public class Tension : MonoBehaviour
+{
+    private Vector3 pendulum;
+    private float length;
+    public Tension(Vector3 pendulum, float length)
+    {
+        this.pendulum = pendulum;
+        this.length = length;
+    }
+
+    // public Vector3 ComputeForce(Vector3 position, float angle, float rotationSpeed, float mass, float gravity)
+    // {
+    //     Vector3 dir = (pendulum - position).normalized;
+
+    //     float magnitude = mass * gravity * Mathf.Cos(angle) + mass * length * Mathf.Pow(rotationSpeed, 2);
+
+    //     return magnitude * dir;
+    // }
+    public Vector3 ComputeForce(Vector3 position, float angle, float initialAngle, float mass, float gravity)
+    {
+        Vector3 dir = (pendulum - position).normalized;
+        float magnitude = mass * gravity * (3 * Mathf.Cos(angle) - 2 * Mathf.Cos(initialAngle));
+        return magnitude * dir;
     }
 }
 
