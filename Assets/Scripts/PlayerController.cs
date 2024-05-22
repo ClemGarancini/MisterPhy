@@ -65,7 +65,7 @@ public class PlayerController : MonoBehaviour
     {
         public bool isGroundedTemporary;
         public bool isGroundedPermanent;
-        public HashSet<GameObject> collisionGameObjects;
+        public Collision2D collision;
 
     }
 
@@ -133,24 +133,24 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // print(velocity.y);
-
         Vector3 contactNormal = collision.GetContact(0).normal;
         float dotProd = Vector3.Dot(velocity, contactNormal);
-        // print($"Vel: {velocity}, Norm: {contactNormal}, Dot:{dotProd}");
         if (!collisionInformation.isGroundedPermanent)
         {
-            // print((1.0f + stiffness) * Math.Abs(dotProd) * contactNormal);
             velocity += (1.0f + stiffness) * Math.Abs(dotProd) * contactNormal;
-            // velocity.y = -stiffness * velocity.y;
         }
+
         collisionInformation.isGroundedTemporary = true;
+        collisionInformation.collision = collision;
     }
 
     void OnCollisionStay2D(Collision2D collision)
     {
+        Vector3 contactNormal = collision.GetContact(0).normal;
+        float dotProd = Vector3.Dot(velocity, contactNormal);
+        velocity -= Math.Abs(dotProd) * contactNormal;
+
         collisionInformation.isGroundedPermanent = true;
-        velocity.y = 0.0f;
     }
 
     void OnCollisionExit2D(Collision2D collision)

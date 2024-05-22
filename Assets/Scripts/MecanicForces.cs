@@ -2,6 +2,7 @@
 using UnityEngine;
 
 using System.Collections.Generic;
+using System;
 
 public class GravityField : MonoBehaviour
 {
@@ -47,6 +48,22 @@ public class SolidFriction : MonoBehaviour
     // public Vector3 ComputeForce()
 }
 
+public class NormalReaction : MonoBehaviour
+{
+    public NormalReaction() { }
+
+    public Vector3 ComputeForce(PlayerController.CollisionInformation collisionInformation, Vector3 weight)
+    {
+        Vector3 force = Vector3.zero;
+        Vector3 contactNormal = collisionInformation.collision.GetContact(0).normal;
+        if (collisionInformation.isGroundedTemporary)
+        {
+            force = Math.Abs(Vector3.Dot(contactNormal, weight)) * contactNormal;
+        }
+        return force;
+    }
+}
+
 public class MecanicForces : MonoBehaviour
 {
 
@@ -69,12 +86,14 @@ public class MecanicForces : MonoBehaviour
 
     GravityField gravityField;
     FluidFriction fluidFriction;
+    NormalReaction normalReactionForce;
     //private List<Vector3> forcesList = new List<Vector3>();
 
     void Start()
     {
         gravityField = new(gravity);
         fluidFriction = new((float)dynamicViscosity);
+        normalReactionForce = new NormalReaction();
 
     }
 
@@ -93,14 +112,12 @@ public class MecanicForces : MonoBehaviour
         fluidForce = fluidFriction.ComputeForce(2 * radius, velocity);
         forces.Add(fluidForce);
 
-        normalReaction = collisionInformation.isGroundedTemporary ? -weight : Vector3.zero;
+        normalReaction = normalReactionForce.ComputeForce(collisionInformation, weight);
         forces.Add(normalReaction);
 
         solidFriction = collisionInformation.isGroundedPermanent ? -moveInput * nominalForce : Vector3.zero;
         forces.Add(solidFriction);
 
-
         return forces;
-
     }
 }
