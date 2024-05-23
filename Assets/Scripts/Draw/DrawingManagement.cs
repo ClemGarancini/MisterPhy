@@ -31,7 +31,7 @@ public class DrawingManagement : MonoBehaviour
         drawWork.Initialize(energySquare, text);
 
         drawForce = new();
-        drawForce.Initialize(kinematicArrow, obj);
+        drawForce.Initialize(kinematicArrow, transform);
 
         pd = pendule.GetComponent<PendulumMovement>();
 
@@ -43,8 +43,7 @@ public class DrawingManagement : MonoBehaviour
         drawEnergy.Draw(playerController.kineticEnergy, playerController.gravitationalPotentialEnergy, playerController.totalEnergy);
         drawKinematic.Draw(playerController.velocity, playerController.acceleration);
         drawWork.Draw(playerController.gravityWork);
-        print(pd.tensionForce);
-        drawForce.Draw(pd.tensionForce, obj);
+        drawForce.Draw(pd.tensionForce, transform);
 
 
 

@@ -178,20 +178,20 @@ public class PlayerController : MonoBehaviour
 
     private void MoveInput()
     {
-        if (collisionInformation.isGroundedPermanent)
+        // if (collisionInformation.isGroundedPermanent)
+        // {
+        if (frameInput.horizontal != 0)
         {
-            if (frameInput.horizontal != 0)
-            {
-                inputForce = frameInput.horizontal * forcesComponent.nominalForce;
-                AccelerationPressed();
-                if (velocity.x == 0) velocity = new Vector3(frameInput.horizontal * moveVelocity, velocity.y, 0.0f);
-                totalForce += inputForce;
-            }
-            else
-            {
-                velocity = new Vector3(0.0f, velocity.y, 0.0f);
-            }
+            inputForce = frameInput.horizontal * forcesComponent.nominalForce;
+            AccelerationPressed();
+            if (velocity.x == 0) velocity = new Vector3(frameInput.horizontal * moveVelocity, velocity.y, 0.0f);
+            totalForce += inputForce;
         }
+        else
+        {
+            velocity = new Vector3(0.0f, velocity.y, 0.0f);
+        }
+        //}
     }
 
     public Energy GetEnergy()
