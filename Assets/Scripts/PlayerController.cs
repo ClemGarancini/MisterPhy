@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
 {
 
     #region Shape characteristic
-    public float radius = 1.0f;
+    public float radius = 0.5f;
     public float mass = 1f;
     public float stiffness = 0.2f;
     #endregion
@@ -23,7 +23,6 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Forces
-    private Vector3 inputForce;
     private MecanicForces forcesComponent;
     public List<Vector3> externalForces { get; private set; }
     Vector3 totalForce;
@@ -40,7 +39,7 @@ public class PlayerController : MonoBehaviour
     #region Input features
     public float moveVelocity = 10f;
     public float jumpForce = 10f;
-    public float maxVelocity = 20.0f;
+    public float maxVelocity = 3.0f;
     #endregion
 
     #region Work
@@ -63,10 +62,10 @@ public class PlayerController : MonoBehaviour
     #region State
     public struct CollisionInformation
     {
-        public bool isGroundedTemporary;
-        public bool isGroundedPermanent;
+        public bool isGrounded;
         public Collision2D collision;
-
+        public Vector3 normal;
+        public Vector3 tangent;
     }
 
     public CollisionInformation collisionInformation;
@@ -88,13 +87,12 @@ public class PlayerController : MonoBehaviour
         work = new();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
 
         totalForce = Vector3.zero;
 
         GetFrameInput();
-        MoveInput();
 
         externalForces = forcesComponent.ComputeForces(this);
         gravityWork = work.GetWork(externalForces[0], transform.position - initialPosition);
@@ -103,19 +101,18 @@ public class PlayerController : MonoBehaviour
         {
             totalForce += force; // Ajoutez chaque vecteur à la somme totale
         }
+        // if (Vector3.Distance(totalForce, new Vector3(0.0f, -9.8f, 0.0f)) > 0.01f)
+        // {
+        //     print($"Total Force: {totalForce}");
+        // }
 
 
-        // CheckGroundCollision();
         Jump();
         ComputeIntegration();
-        if (transform.position.y < -25.0f)
-        {
-            transform.position = new Vector3(-20.0f, 60.0f, 0.0f);
-        }
 
         kineticEnergy = energy.GetKineticEnergy(mass, velocity);
-        gravitationalPotentialEnergy = energy.GetGravitationalPotentialEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius);
-        totalEnergy = energy.GetTotalEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius, velocity);
+        // gravitationalPotentialEnergy = energy.GetGravitationalPotentialEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius);
+        // totalEnergy = energy.GetTotalEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius, velocity);
     }
 
     private void ComputeIntegration()
@@ -126,77 +123,55 @@ public class PlayerController : MonoBehaviour
         transform.position += velocity * deltaTime;
     }
 
-    private void AccelerationPressed()
-    {
-        if (frameInput.accelerate)
-        {
-            inputForce = 2 * frameInput.horizontal * forcesComponent.nominalForce;
-        }
-        VelocityLimit();
-    }
+    // private void AccelerationPressed()
+    // {
+    //     if (frameInput.accelerate)
+    //     {
+    //         inputForce = 2 * frameInput.horizontal * forcesComponent.nominalForce;
+    //     }
+    //     VelocityLimit();
+    // }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
         Vector3 contactNormal = collision.GetContact(0).normal;
-        float dotProd = Vector3.Dot(velocity, contactNormal);
-        if (!collisionInformation.isGroundedPermanent)
+        float dotProd = Math.Abs(Vector3.Dot(velocity, contactNormal));
+        if (dotProd > 0.5f)
         {
             velocity += (1.0f + stiffness) * Math.Abs(dotProd) * contactNormal;
         }
+        else
+        {
+            velocity += dotProd * contactNormal;
 
-        collisionInformation.isGroundedTemporary = true;
-        collisionInformation.collision = collision;
-    }
-
-    void OnCollisionStay2D(Collision2D collision)
-    {
-        Vector3 contactNormal = collision.GetContact(0).normal;
-        float dotProd = Vector3.Dot(velocity, contactNormal);
-        velocity -= Math.Abs(dotProd) * contactNormal;
-
-        collisionInformation.isGroundedPermanent = true;
+            collisionInformation.isGrounded = true;
+            collisionInformation.collision = collision;
+            collisionInformation.normal = contactNormal;
+            collisionInformation.tangent = Vector3.Cross(contactNormal, Vector3.forward).normalized;
+        }
     }
 
     void OnCollisionExit2D(Collision2D collision)
     {
-        collisionInformation.isGroundedTemporary = false;
+        collisionInformation.isGrounded = false;
     }
-
 
     private void Jump()
     {
-        if (frameInput.jump && collisionInformation.isGroundedPermanent)
+        if (frameInput.jump && collisionInformation.isGrounded)
         {
             velocity = new Vector3(velocity.x, jumpForce, 0.0f);
-            collisionInformation.isGroundedPermanent = false;
+            collisionInformation.isGrounded = false;
         }
     }
 
-    private void VelocityLimit()
-    {
-        if (Mathf.Abs(velocity.x) > maxVelocity)
-        {
-            velocity.x = maxVelocity * velocity.x / Mathf.Abs(velocity.x);
-        }
-    }
-
-    private void MoveInput()
-    {
-        if (collisionInformation.isGroundedPermanent)
-        {
-            if (frameInput.horizontal != 0)
-            {
-                inputForce = frameInput.horizontal * forcesComponent.nominalForce;
-                AccelerationPressed();
-                if (velocity.x == 0) velocity = new Vector3(frameInput.horizontal * moveVelocity, velocity.y, 0.0f);
-                totalForce += inputForce;
-            }
-            else
-            {
-                velocity = new Vector3(0.0f, velocity.y, 0.0f);
-            }
-        }
-    }
+    // private void VelocityLimit()
+    // {
+    //     if (Mathf.Abs(velocity.x) > maxVelocity)
+    //     {
+    //         velocity.x = maxVelocity * velocity.x / Mathf.Abs(velocity.x);
+    //     }
+    // }
 
     public Energy GetEnergy()
     {
