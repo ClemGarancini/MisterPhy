@@ -8,7 +8,7 @@ public class PendulumMovement : MonoBehaviour
     //private MecanicForces forcesComponent;
     private Tension tension;
 
-    public float mass;
+    public float basketMass = 0.1f;
     private GravityField gravityField;
 
     public Vector3 tensionForce;
@@ -22,17 +22,18 @@ public class PendulumMovement : MonoBehaviour
 
 
 
-    private Transform objTransform;
-    private PlayerController objController;
-    public GameObject obj;
+    #region Player
+    private Transform playerTransform;
+    private PlayerController playerController;
+    public GameObject player;
 
-
+    #endregion
 
     private Transform thread;
 
     private Transform basis;
 
-    public Transform center;
+    public Transform basket;
 
 
     private Vector3 totalForce;
@@ -43,71 +44,76 @@ public class PendulumMovement : MonoBehaviour
     {
         thread = transform.Find("Thread");
         basis = transform.Find("Basis");
-        center = transform.Find("Center");
+        basket = transform.Find("Center");
         length = thread.localScale.y;
 
-        tension = new(transform.position, length);
+        tension = new(basis.position, length);
         gravityField = new(new Vector3(0.0f, -gravity, 0.0f));
-        weight = gravityField.ComputeForce(mass);
-    }
-    void OnEnable()
-    {
-        objController = obj.GetComponent<PlayerController>();
-        objController.velocity = Vector3.zero;
-        mass = objController.mass;
-        objTransform = obj.transform;
+        weight = gravityField.ComputeForce(basketMass);
 
-        Vector3 direction = (objTransform.position - transform.position).normalized;
+        Vector3 direction = (basket.position - basis.position).normalized;
         angle = Mathf.Atan2(direction.x, -direction.y);
-        //transform.rotation = Quaternion.Euler(0.0f, 0.0f, angle * 180 / Mathf.PI);
         initialAngle = angle;
+
+    }
+    public void PlayerOnPendulum()
+    {
+        playerController = player.GetComponent<PlayerController>();
+        playerController.isOnPendulum = true;
+        playerController.velocity = Vector3.zero;
+        basketMass += playerController.mass;
+        playerTransform = player.transform;
     }
 
-    void OnDisable()
+    public void PlayerOffPendulum()
     {
-        if (objTransform != null) objTransform.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-        obj = null;
-        objController = null;
-        objTransform = null;
-        mass = 0.0f;
-        velocity = new Vector3(0.0f, 0.0f, 0.0f);
+        playerController.isOnPendulum = false;
+        if (playerTransform != null) playerTransform.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+        player = null;
+        playerController = null;
+        playerTransform = null;
+        basketMass -= playerController.mass;
     }
     void Update()
     {
 
-        if (objController.frameInput.jump)
+        if (playerController != null && playerController.frameInput.jump)
         {
-            enabled = false;
+            PlayerOffPendulum();
         }
         else
         {
 
-            Vector3 direction = (objTransform.position - transform.position).normalized;
+            Vector3 direction = (basket.position - basis.position).normalized;
             angle = Mathf.Atan2(direction.x, -direction.y);
-
-
-            tensionForce = tension.ComputeForce(objTransform.position, angle, initialAngle, mass, gravity);
-            totalForce = tensionForce + weight;
-            ComputeIntegration();
+            print(angle * Mathf.Rad2Deg);
 
             // Update pendulum rotation
             transform.rotation = Quaternion.Euler(0.0f, 0.0f, angle * Mathf.Rad2Deg);
-            objTransform.rotation = Quaternion.Euler(0.0f, 0.0f, angle * Mathf.Rad2Deg);
+            if (playerTransform != null) playerTransform.rotation = Quaternion.Euler(0.0f, 0.0f, angle * Mathf.Rad2Deg);
+
+            tensionForce = tension.ComputeForce(basket.position, angle, initialAngle, basketMass, gravity);
+
+            totalForce = tensionForce + weight;
+            ComputeIntegration();
+
+
         }
 
     }
 
     private void ComputeIntegration()
     {
-        acceleration = totalForce / mass;
+        acceleration = totalForce / basketMass;
         velocity += acceleration * Time.deltaTime;
-        objTransform.position += velocity * Time.deltaTime;
-        EnforcePendulumLength();
+        basket.position += velocity * Time.deltaTime;
+        if (playerTransform != null) playerTransform.position = basket.position;
+        //EnforcePendulumLength();
     }
 
     private void EnforcePendulumLength()
     {
-        Vector3 direction = (objTransform.position - transform.position).normalized;
-        objTransform.position -= ((objTransform.position - transform.position).magnitude - length) * direction;
+        Vector3 direction = (playerTransform.position - transform.position).normalized;
+        playerTransform.position -= ((playerTransform.position - transform.position).magnitude - length) * direction;
     }
 }

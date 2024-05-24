@@ -72,6 +72,8 @@ public class PlayerController : MonoBehaviour
     public CollisionInformation collisionInformation;
     #endregion
 
+    public bool isOnPendulum = false;
+
     private void Start()
     {
         initialPosition = transform.position;
@@ -161,7 +163,7 @@ public class PlayerController : MonoBehaviour
 
     private void Jump()
     {
-        if (frameInput.jump && collisionInformation.isGroundedPermanent)
+        if (frameInput.jump && (collisionInformation.isGroundedPermanent || isOnPendulum))
         {
             velocity = new Vector3(velocity.x, jumpForce, 0.0f);
             collisionInformation.isGroundedPermanent = false;
