@@ -45,5 +45,4 @@ public class Energy : MonoBehaviour
     {
         return GetKineticEnergy(mass, velocity) + GetGravitationalPotentialEnergy(mass, gravity, height);
     }
-
 }
