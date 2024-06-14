@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using Unity.Properties;
 using System;
+
 public class PlayerController : MonoBehaviour
 {
 
@@ -18,7 +19,6 @@ public class PlayerController : MonoBehaviour
     public Vector3 velocity; // m/s
     public Vector3 acceleration;
     public float timeMultiplier = 1.0f;
-
     public Vector3 initialPosition;
     #endregion
 
@@ -39,7 +39,8 @@ public class PlayerController : MonoBehaviour
     #region Input features
     public float moveVelocity = 10f;
     public float jumpForce = 10f;
-    public float maxVelocity = 3.0f;
+    public float maxVelocity = 10.0f;
+    public bool allowRebound = false;
     #endregion
 
     #region Work
@@ -77,11 +78,10 @@ public class PlayerController : MonoBehaviour
     {
         initialPosition = transform.position;
 
-        forcesComponent = GetComponent<MecanicForces>();
+        forcesComponent = new();
+        forcesComponent.Initialize("Player");
 
         transform.localScale = new Vector3(2 * radius, 2 * radius, 0.0f);
-
-        totalForce = Vector3.zero;
 
         energy = new();
         energy.Initialize();
@@ -95,14 +95,8 @@ public class PlayerController : MonoBehaviour
         totalForce = Vector3.zero;
 
         GetFrameInput();
+        PFD();
 
-        externalForces = forcesComponent.ComputeForces(this);
-        gravityWork = work.GetWork(externalForces[0], transform.position - initialPosition);
-
-        foreach (Vector3 force in externalForces)
-        {
-            totalForce += force; // Ajoutez chaque vecteur à la somme totale
-        }
         // if (Vector3.Distance(totalForce, new Vector3(0.0f, -9.8f, 0.0f)) > 0.01f)
         // {
         //     print($"Total Force: {totalForce}");
@@ -110,11 +104,20 @@ public class PlayerController : MonoBehaviour
 
 
         Jump();
-        ComputeIntegration();
 
         kineticEnergy = energy.GetKineticEnergy(mass, velocity);
         // gravitationalPotentialEnergy = energy.GetGravitationalPotentialEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius);
         // totalEnergy = energy.GetTotalEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius, velocity);
+    }
+
+    private void PFD()
+    {
+        externalForces = forcesComponent.ComputeForces(this);
+        foreach (Vector3 force in externalForces)
+        {
+            totalForce += force;
+        }
+        ComputeIntegration();
     }
 
     private void ComputeIntegration()
@@ -125,20 +128,13 @@ public class PlayerController : MonoBehaviour
         transform.position += velocity * deltaTime;
     }
 
-    // private void AccelerationPressed()
-    // {
-    //     if (frameInput.accelerate)
-    //     {
-    //         inputForce = 2 * frameInput.horizontal * forcesComponent.nominalForce;
-    //     }
-    //     VelocityLimit();
-    // }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
         Vector3 contactNormal = collision.GetContact(0).normal;
         float dotProd = Math.Abs(Vector3.Dot(velocity, contactNormal));
-        if (dotProd > 0.5f)
+
+        if (allowRebound && dotProd > 0.5f)
         {
             velocity += (1.0f + stiffness) * Math.Abs(dotProd) * contactNormal;
         }
@@ -150,6 +146,11 @@ public class PlayerController : MonoBehaviour
             collisionInformation.collision = collision;
             collisionInformation.normal = contactNormal;
             collisionInformation.tangent = Vector3.Cross(contactNormal, Vector3.forward).normalized;
+
+            if (Vector3.Dot(contactNormal, Vector3.up) < 0)
+            {
+                collisionInformation.isGrounded = false;
+            }
         }
     }
 
@@ -163,7 +164,7 @@ public class PlayerController : MonoBehaviour
         if (frameInput.jump && collisionInformation.isGrounded)
         {
             velocity = new Vector3(velocity.x, jumpForce, 0.0f);
-            collisionInformation.isGrounded = false;
+            //collisionInformation.isGrounded = false;
         }
     }
 
@@ -185,7 +186,7 @@ public class PlayerController : MonoBehaviour
         frameInput = new FrameInput
         {
             horizontal = Input.GetAxisRaw("Horizontal"),
-            jump = Input.GetKeyDown(KeyCode.Space),
+            jump = Input.GetKey(KeyCode.Space),
             accelerate = Input.GetKey(KeyCode.LeftShift)
         };
     }

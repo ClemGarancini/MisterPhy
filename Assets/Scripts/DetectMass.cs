@@ -6,19 +6,19 @@ using UnityEngine;
 public class DetectMass : MonoBehaviour
 {
     private Transform pendulum;
-    private PendulumMovement pendulumMovement;
+    private PendulumController pendulumController;
 
     void Start()
     {
         pendulum = transform.parent;
-        pendulumMovement = pendulum.gameObject.GetComponent<PendulumMovement>();
+        pendulumController = pendulum.gameObject.GetComponent<PendulumController>();
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
         {
-            pendulumMovement.player = other.gameObject;
-            pendulumMovement.PlayerOnPendulum();
+            pendulumController.player = other.gameObject;
+            pendulumController.PlayerOnPendulum();
         }
     }
 

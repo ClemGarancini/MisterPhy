@@ -1,26 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using UnityEngine;
 
-public class PendulumMovement : MonoBehaviour
+public class PendulumController : MonoBehaviour
 {
     //private MecanicForces forcesComponent;
-    private Tension tension;
 
-    public float basketMass = 0.1f;
-    private GravityField gravityField;
+    public float basketMass = 0.5f;
 
-    public Vector3 tensionForce;
-    private Vector3 weight;
 
-    private float angle;
-    private float initialAngle;
+    public float angle;
+    public float initialAngle;
 
     public Vector3 velocity; // m/s
     public Vector3 acceleration;
 
-
+    #region Forces
+    private MecanicForces forcesComponent;
+    public List<Vector3> externalForces { get; private set; }
+    Vector3 totalForce;
+    #endregion
 
     #region Player
     private Transform playerTransform;
@@ -31,25 +30,22 @@ public class PendulumMovement : MonoBehaviour
 
     private Transform thread;
 
-    private Transform basis;
+    public Transform basis;
 
     public Transform basket;
 
-
-    private Vector3 totalForce;
-    private float length;
-    private float gravity = 9.8f;
+    public float length;
 
     void Start()
     {
         thread = transform.Find("Thread");
         basis = transform.Find("Basis");
-        basket = transform.Find("Center");
-        length = thread.localScale.y;
+        //basket = transform.Find("Center");
+        length = (basket.position - basis.position).magnitude;
 
-        tension = new(basis.position, length);
-        gravityField = new(new Vector3(0.0f, -gravity, 0.0f));
-        weight = gravityField.ComputeForce(basketMass);
+
+        forcesComponent = new();
+        forcesComponent.Initialize("Pendulum");
 
         Vector3 direction = (basket.position - basis.position).normalized;
         angle = Mathf.Atan2(direction.x, -direction.y);
@@ -77,6 +73,7 @@ public class PendulumMovement : MonoBehaviour
     void Update()
     {
 
+        totalForce = Vector3.zero;
         if (playerController != null && playerController.frameInput.jump)
         {
             PlayerOffPendulum();
@@ -86,18 +83,19 @@ public class PendulumMovement : MonoBehaviour
 
             Vector3 direction = (basket.position - basis.position).normalized;
             angle = Mathf.Atan2(direction.x, -direction.y);
-            print(angle * Mathf.Rad2Deg);
+            //print(angle * Mathf.Rad2Deg);
 
             // Update pendulum rotation
             transform.rotation = Quaternion.Euler(0.0f, 0.0f, angle * Mathf.Rad2Deg);
             if (playerTransform != null) playerTransform.rotation = Quaternion.Euler(0.0f, 0.0f, angle * Mathf.Rad2Deg);
 
-            tensionForce = tension.ComputeForce(basket.position, angle, initialAngle, basketMass, gravity);
-
-            totalForce = tensionForce + weight;
+            externalForces = forcesComponent.ComputeForces(this);
+            foreach (Vector3 force in externalForces)
+            {
+                totalForce += force;
+            }
+            print(totalForce);
             ComputeIntegration();
-
-
         }
 
     }
