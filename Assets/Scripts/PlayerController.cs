@@ -8,10 +8,11 @@ using System;
 public class PlayerController : MonoBehaviour
 {
 
+    public PlayerStats playerStats;
     #region Shape characteristic
-    public float radius = 0.5f;
-    public float mass = 1f;
-    public float stiffness = 0.2f;
+    public float radius;
+    public float mass;
+    public float stiffness;
     #endregion
 
     #region Kinematic features
@@ -23,8 +24,10 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Forces
-    private MecanicForces forcesComponent;
+    private MecanicForces externalForcesComponent;
+    private InternalForces internalForcesComponent;
     public List<Vector3> externalForces { get; private set; }
+    public List<Vector3> internalForces { get; private set; }
     Vector3 totalForce;
     #endregion
 
@@ -37,9 +40,8 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Input features
-    public float moveVelocity = 10f;
-    public float jumpForce = 10f;
-    public float maxVelocity = 3.0f;
+    public float jumpForce;
+    public float maxVelocity;
     #endregion
 
     #region Work
@@ -67,17 +69,27 @@ public class PlayerController : MonoBehaviour
         public Vector3 normal;
         public Vector3 tangent;
     }
-
     public CollisionInformation collisionInformation;
-    #endregion
 
     public bool isOnPendulum = false;
+    #endregion
 
+
+    private void InitConstants()
+    {
+        mass = playerStats.mass;
+        radius = playerStats.radius;
+        stiffness = playerStats.stiffness;
+        maxVelocity = playerStats.maxVelocity;
+        jumpForce = playerStats.jumpForce;
+    }
     private void Start()
     {
+        InitConstants();
         initialPosition = transform.position;
 
-        forcesComponent = GetComponent<MecanicForces>();
+        externalForcesComponent = GetComponent<MecanicForces>();
+        internalForcesComponent = GetComponent<InternalForces>();
 
         transform.localScale = new Vector3(2 * radius, 2 * radius, 0.0f);
 
@@ -96,13 +108,19 @@ public class PlayerController : MonoBehaviour
 
         GetFrameInput();
 
-        externalForces = forcesComponent.ComputeForces(this);
+        externalForces = externalForcesComponent.ComputeForces(this);
+        internalForces = internalForcesComponent.ComputeForces(this);
         gravityWork = work.GetWork(externalForces[0], transform.position - initialPosition);
 
         foreach (Vector3 force in externalForces)
         {
             totalForce += force; // Ajoutez chaque vecteur à la somme totale
         }
+        foreach (Vector3 force in internalForces)
+        {
+            totalForce += force; // Ajoutez chaque vecteur à la somme totale
+        }
+
         // if (Vector3.Distance(totalForce, new Vector3(0.0f, -9.8f, 0.0f)) > 0.01f)
         // {
         //     print($"Total Force: {totalForce}");
@@ -125,32 +143,25 @@ public class PlayerController : MonoBehaviour
         transform.position += velocity * deltaTime;
     }
 
-    // private void AccelerationPressed()
-    // {
-    //     if (frameInput.accelerate)
-    //     {
-    //         inputForce = 2 * frameInput.horizontal * forcesComponent.nominalForce;
-    //     }
-    //     VelocityLimit();
-    // }
-
     void OnCollisionEnter2D(Collision2D collision)
     {
         Vector3 contactNormal = collision.GetContact(0).normal;
         float dotProd = Math.Abs(Vector3.Dot(velocity, contactNormal));
-        if (dotProd > 0.5f)
-        {
-            velocity += (1.0f + stiffness) * Math.Abs(dotProd) * contactNormal;
-        }
-        else
-        {
-            velocity += dotProd * contactNormal;
+        // Rebound
+        // if (dotProd > 0.5f)
+        // {
+        //     print("dot " + dotProd);
+        //     velocity += (1.0f + stiffness) * dotProd * contactNormal;
+        // }
+        // else
 
-            collisionInformation.isGrounded = true;
-            collisionInformation.collision = collision;
-            collisionInformation.normal = contactNormal;
-            collisionInformation.tangent = Vector3.Cross(contactNormal, Vector3.forward).normalized;
-        }
+        velocity += dotProd * contactNormal;
+
+        collisionInformation.isGrounded = true;
+        collisionInformation.collision = collision;
+        collisionInformation.normal = contactNormal;
+        collisionInformation.tangent = Vector3.Cross(contactNormal, Vector3.forward).normalized;
+
     }
 
     void OnCollisionExit2D(Collision2D collision)

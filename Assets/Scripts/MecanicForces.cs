@@ -77,6 +77,7 @@ public class Tension : MonoBehaviour
         return magnitude * dir;
     }
 }
+
 public class SolidFrictionDynamic : MonoBehaviour
 {
     private float dynamicFrictionCoefficient;
@@ -106,31 +107,12 @@ public class SolidFrictionDynamic : MonoBehaviour
     }
 }
 
-public class InputImpulsion : MonoBehaviour
-{
-    private float dynamicFrictionCoefficient;
-    public InputImpulsion(float dynamicFrictionCoefficient)
-    {
-        this.dynamicFrictionCoefficient = dynamicFrictionCoefficient;
-    }
-
-    public Vector3 ComputeForce(PlayerController.CollisionInformation collisionInformation, PlayerController.FrameInput frameInput)
-    {
-        if (collisionInformation.isGrounded)
-        {
-            return frameInput.horizontal * dynamicFrictionCoefficient * collisionInformation.tangent;
-        }
-        return Vector3.zero;
-    }
-}
-
 public class MecanicForces : MonoBehaviour
 {
-
     #region Constants
     private Vector3 gravity = new(0.0f, -9.8f, 0.0f);
     private double dynamicViscosity = 18.5 * 1e-6;
-    private float dynamicFrictionCoefficient = 5.0f;
+    private float dynamicFrictionCoefficient = 20.0f;
     #endregion
 
     #region Forces
@@ -147,20 +129,14 @@ public class MecanicForces : MonoBehaviour
     SolidFrictionDynamic solidFrictionDynamic;
     private Vector3 solidFrictionDynamicForce;
 
-    InputImpulsion inputImpulsion;
-    private Vector3 inputImpulsionForce;
-
     #endregion
 
     void Start()
     {
         gravityField = new GravityField(gravity);
         normalReaction = new NormalReaction();
-
-        fluidFriction = new((float)dynamicViscosity);
-
         solidFrictionDynamic = new SolidFrictionDynamic(dynamicFrictionCoefficient);
-        inputImpulsion = new InputImpulsion(dynamicFrictionCoefficient);
+        fluidFriction = new((float)dynamicViscosity);
     }
 
     // Update is called once per frame
@@ -190,9 +166,6 @@ public class MecanicForces : MonoBehaviour
         solidFrictionDynamicForce = solidFrictionDynamic.ComputeForce(collisionInformation, frameInput, ref playerController.velocity, maxVelocity);
         forces.Add(solidFrictionDynamicForce);
         // print($"sF: {solidFriction}");
-
-        inputImpulsionForce = inputImpulsion.ComputeForce(collisionInformation, frameInput);
-        forces.Add(inputImpulsionForce);
 
         return forces;
     }
