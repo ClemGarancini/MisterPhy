@@ -169,13 +169,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // private void VelocityLimit()
-    // {
-    //     if (Mathf.Abs(velocity.x) > maxVelocity)
-    //     {
-    //         velocity.x = maxVelocity * velocity.x / Mathf.Abs(velocity.x);
-    //     }
-    // }
 
     public Energy GetEnergy()
     {

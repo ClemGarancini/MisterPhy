@@ -54,19 +54,6 @@ public class NormalReaction
 
 public class Tension
 {
-
-    public Tension()
-    {
-    }
-
-    // public Vector3 ComputeForce(Vector3 position, float angle, float rotationSpeed, float mass, float gravity)
-    // {
-    //     Vector3 dir = (pendulum - position).normalized;
-
-    //     float magnitude = mass * gravity * Mathf.Cos(angle) + mass * length * Mathf.Pow(rotationSpeed, 2);
-
-    //     return magnitude * dir;
-    // }
     public Vector3 ComputeForce(Vector3 pendulum, float length, Vector3 position, float angle, float initialAngle, float mass, float gravity)
     {
         Vector3 dir = (pendulum - position).normalized;
@@ -74,6 +61,7 @@ public class Tension
         return magnitude * dir;
     }
 }
+
 public class SolidFrictionDynamic
 {
     private float dynamicFrictionCoefficient;
@@ -123,7 +111,6 @@ public class InputImpulsion
 
 public class MecanicForces
 {
-
     #region Constants
     private Vector3 gravity = new(0.0f, -9.8f, 0.0f);
     private double dynamicViscosity = 18.5 * 1e-6;
