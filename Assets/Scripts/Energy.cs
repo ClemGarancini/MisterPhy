@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 
-public class KineticEnergy : MonoBehaviour
+public class KineticEnergy
 {
     public float GetKineticEnergy(float mass, Vector3 velocity)
     {
@@ -11,7 +11,7 @@ public class KineticEnergy : MonoBehaviour
     }
 }
 
-public class GravitationalPotentialEnergy : MonoBehaviour
+public class GravitationalPotentialEnergy
 {
     public float GetGravitationalPotentialEnergy(float mass, float gravity, float height)
     {
@@ -19,7 +19,7 @@ public class GravitationalPotentialEnergy : MonoBehaviour
     }
 }
 
-public class Energy : MonoBehaviour
+public class Energy
 {
     private KineticEnergy kineticEnergy;
     private GravitationalPotentialEnergy gravitationalPotentialEnergy;

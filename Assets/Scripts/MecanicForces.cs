@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System;
 
 
-public class GravityField : MonoBehaviour
+public class GravityField
 {
     // The weight is a conservative force which means it derivates from a potential energy (the gravitational potential energy)
     private Vector3 gravity;
@@ -21,7 +21,7 @@ public class GravityField : MonoBehaviour
     }
 }
 
-public class FluidFriction : MonoBehaviour
+public class FluidFriction
 {
     private float dynamicViscosity;
 
@@ -36,7 +36,7 @@ public class FluidFriction : MonoBehaviour
     }
 }
 
-public class NormalReaction : MonoBehaviour
+public class NormalReaction
 {
     public NormalReaction() { }
 
@@ -52,7 +52,7 @@ public class NormalReaction : MonoBehaviour
     }
 }
 
-public class Tension : MonoBehaviour
+public class Tension
 {
 
     public Tension()
@@ -74,7 +74,7 @@ public class Tension : MonoBehaviour
         return magnitude * dir;
     }
 }
-public class SolidFrictionDynamic : MonoBehaviour
+public class SolidFrictionDynamic
 {
     private float dynamicFrictionCoefficient;
     private float velocityMinThreshold;
@@ -103,7 +103,7 @@ public class SolidFrictionDynamic : MonoBehaviour
     }
 }
 
-public class InputImpulsion : MonoBehaviour
+public class InputImpulsion
 {
     private float dynamicFrictionCoefficient;
     public InputImpulsion(float dynamicFrictionCoefficient)
@@ -121,7 +121,7 @@ public class InputImpulsion : MonoBehaviour
     }
 }
 
-public class MecanicForces : MonoBehaviour
+public class MecanicForces
 {
 
     #region Constants
@@ -217,7 +217,7 @@ public class MecanicForces : MonoBehaviour
         //print($"w: {weight}");
         tensionForce = tension.ComputeForce(pendulumController.basis.position, pendulumController.length, pendulumController.basket.position, pendulumController.angle, pendulumController.initialAngle, pendulumController.basketMass, Mathf.Abs(gravity.y));
         forces.Add(tensionForce);
-        print($"T: {tensionForce}");
+        //print($"T: {tensionForce}");
 
         return forces;
     }

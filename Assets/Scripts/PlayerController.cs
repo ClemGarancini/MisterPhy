@@ -83,7 +83,7 @@ public class PlayerController : MonoBehaviour
 
         transform.localScale = new Vector3(2 * radius, 2 * radius, 0.0f);
 
-        energy = new();
+        energy = new Energy();
         energy.Initialize();
 
         work = new();
@@ -107,8 +107,9 @@ public class PlayerController : MonoBehaviour
 
         kineticEnergy = energy.GetKineticEnergy(mass, velocity);
         // gravitationalPotentialEnergy = energy.GetGravitationalPotentialEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius);
-        // totalEnergy = energy.GetTotalEnergy(mass, -forcesComponent.gravity.y, transform.position.y - radius, velocity);
+
     }
+
 
     private void PFD()
     {
