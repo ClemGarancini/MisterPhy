@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3598440856102821947}
   - component: {fileID: 2340944491659294415}
-  - component: {fileID: 8094467410799375920}
+  - component: {fileID: 6219410354583675152}
   m_Layer: 0
   m_Name: HoleDetector
   m_TagString: Untagged
@@ -78,7 +78,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 11.4, y: 1}
   m_EdgeRadius: 0
---- !u!114 &8094467410799375920
+--- !u!114 &6219410354583675152
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -87,10 +87,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 711738605488842964}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3433f4034f37a400ea62e2cdee9d5fcf, type: 3}
+  m_Script: {fileID: 11500000, guid: c630eecc9847e4fc2b0339ca8ece9057, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  respawn: {fileID: 7804622627388684931}
+  respawn: {fileID: 0}
 --- !u!1 &1095328046594286695
 GameObject:
   m_ObjectHideFlags: 0
